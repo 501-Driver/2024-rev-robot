@@ -19,11 +19,14 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import java.util.List;
+
+
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -34,10 +37,12 @@ import java.util.List;
 public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+  private final IntakeSubsystem m_intakeSub = new IntakeSubsystem();
+ 
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
-
+  XboxController  m_operatorController = new XboxController(OIConstants.kOperatorControllerPort);
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -45,17 +50,31 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
-    // Configure default commands
+
+    // Configure default commands 
     m_robotDrive.setDefaultCommand(
         // The left stick controls translation of the robot.
         // Turning is controlled by the X axis of the right stick.
         new RunCommand(
             () -> m_robotDrive.drive(
-                -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(m_driverController.getLeftY() * 0.35, OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(m_driverController.getLeftX() * 0.35, OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(m_driverController.getRightX()* 0.35, OIConstants.kDriveDeadband),
                 true, true),
-            m_robotDrive));
+            m_robotDrive)
+        
+        );
+        
+        
+     m_intakeSub.setDefaultCommand(       
+        new RunCommand(
+            () -> m_intakeSub.Default(),
+            m_intakeSub
+            )
+        );
+            
+        
+       
   }
 
   /**
@@ -72,6 +91,18 @@ public class RobotContainer {
         .whileTrue(new RunCommand(
             () -> m_robotDrive.setX(),
             m_robotDrive));
+
+    new JoystickButton(m_operatorController, XboxController.Button.kA.value) 
+        .whileTrue(new RunCommand(
+            () -> m_intakeSub.RunIntake(), 
+            m_intakeSub));
+
+    new JoystickButton(m_operatorController, XboxController.Button.kA.value) 
+        .whileTrue(new RunCommand(
+            () -> m_intakeSub.RunEject(), 
+            m_intakeSub));
+
+
   }
 
   /**
